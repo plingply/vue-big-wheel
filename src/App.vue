@@ -10,6 +10,7 @@
         goClassName = 'btn'
         :strMaxLength = '14'
         :strLineLength = '6'
+        stroke-style='#000'
         strKey='name'
         @go-click = "go"
         @on-over = "onOver"

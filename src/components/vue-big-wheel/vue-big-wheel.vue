@@ -10,64 +10,84 @@
     ></canvas>
     <img
       :src="goBtnImg"
+      :style="{ width: gobtnwidth }"
       class="_big-wheel-go-img"
       :class="goClassName"
       @click.stop="_onGo"
-    >
+    />
   </div>
 </template>
 
 <script>
-import { BtnImg } from './_base64.js'
+import { BtnImg } from "./_base64.js";
 export default {
-  name: 'vueBigWheel',
+  name: "vueBigWheel",
   props: {
-    prizeList: {  //奖品列表
+    prizeList: {
+      //奖品列表
       type: Array,
       required: true
     },
-    colors: { // 奖品区块对应背景颜色
+    colors: {
+      // 奖品区块对应背景颜色
       type: Array,
-      default: () => [
-        "#F47F45",
-        "#FFA468"
-      ],
+      default: () => ["#F47F45", "#FFA468"],
       validator: function(value) {
-        return value.length == 2
+        return value.length == 2;
       }
     },
-    transitionDuration: { // 旋转动画时间 单位s
+    transitionDuration: {
+      // 旋转动画时间 单位s
       type: Number,
       default: () => 8
     },
-    fontColor: { // 奖品字体颜色
+    fontColor: {
+      // 奖品字体颜色
       type: String,
-      default: () => '#7D2A00'
+      default: () => "#7D2A00"
     },
-    fontSize: { // 奖品文字的大小
+    strokeStyle: {
+      // 奖品字体颜色
       type: String,
-      default: () => '18px'
+      default: () => "#FFBE04"
     },
-    fontFamily: { // 奖品文字的字体
+    gobtnwidth: {
+      // 按钮图片宽
       type: String,
-      default: () => 'Helvetica Neue,Tahoma,Arial,PingFangSC-Regular,Hiragino Sans GB,Microsoft Yahei,sans-serif'
+      default: () => "112px"
     },
-    goBtnImg: { // 开始按钮图片地址
+    fontSize: {
+      // 奖品文字的大小
+      type: String,
+      default: () => "18px"
+    },
+    fontFamily: {
+      // 奖品文字的字体
+      type: String,
+      default: () =>
+        "Helvetica Neue,Tahoma,Arial,PingFangSC-Regular,Hiragino Sans GB,Microsoft Yahei,sans-serif"
+    },
+    goBtnImg: {
+      // 开始按钮图片地址
       type: String,
       default: () => BtnImg
     },
-    goClassName: { // 开始按钮自定义类名
+    goClassName: {
+      // 开始按钮自定义类名
       type: String
     },
-    strKey: { // 奖品名称所对应的key
+    strKey: {
+      // 奖品名称所对应的key
       type: String,
       required: true
     },
-    strMaxLength: { // 奖品文字总长度限制
+    strMaxLength: {
+      // 奖品文字总长度限制
       type: Number,
       default: () => 0
     },
-    strLineLength: {  // 奖品文字需要多行情况下第一行文字长度
+    strLineLength: {
+      // 奖品文字需要多行情况下第一行文字长度
       type: Number,
       default: () => 0
     }
@@ -80,18 +100,18 @@ export default {
       textRadius: 140, //转盘奖品位置距离圆心的距离
       isOnRotate: false, // 是否正在旋转，false 否
       stayIndex: 0, // 当前停留在那个奖品的序号
-      targetAngle: 0, // 旋转到奖品目标需要的角度
+      targetAngle: 0 // 旋转到奖品目标需要的角度
     };
   },
   computed: {
     // 根据奖品列表计算canvas旋转角度，保持让启动按钮指针在奖品分区中间
     canvasAngle: function() {
-      let _value = this.prizeList.length
-      if(_value % 4 != 0) {
-        return 0
+      let _value = this.prizeList.length;
+      if (_value % 4 != 0) {
+        return 0;
       } else {
-        let _a = _value / 4
-        return _a % 2 == 0 ? 45/_a : 45
+        let _a = _value / 4;
+        return _a % 2 == 0 ? 45 / _a : 45;
       }
     }
   },
@@ -105,30 +125,33 @@ export default {
      * targetIndex: Number 目标奖品序号
      */
     rotateFunc(targetIndex, count = this.prizeList.length) {
-      let _baseAngle = 360 / count
-      let _angles
-      if(this.targetAngle == 0) {
-        // 第一次旋转角度 = 270度 - (停留的序号-目标序号)*每个奖品区间角度 - 每个奖品区间角度的一半 - canvas自身旋转的读书 
-        _angles = (360 * 3 / 4 - (targetIndex - this.stayIndex) * _baseAngle - _baseAngle / 2) - this.canvasAngle;
+      let _baseAngle = 360 / count;
+      let _angles;
+      if (this.targetAngle == 0) {
+        // 第一次旋转角度 = 270度 - (停留的序号-目标序号)*每个奖品区间角度 - 每个奖品区间角度的一半 - canvas自身旋转的读书
+        _angles =
+          (360 * 3) / 4 -
+          (targetIndex - this.stayIndex) * _baseAngle -
+          _baseAngle / 2 -
+          this.canvasAngle;
       } else {
         // 后续继续旋转 就只需要计算停留的位置与目标位置的角度
-        _angles = -(targetIndex - this.stayIndex) * _baseAngle
+        _angles = -(targetIndex - this.stayIndex) * _baseAngle;
       }
-      this.stayIndex = targetIndex
-      this.targetAngle += _angles + 360 * 8 // 转八圈 圈数越多，转的越快
-
+      this.stayIndex = targetIndex;
+      this.targetAngle += _angles + 360 * 8; // 转八圈 圈数越多，转的越快
 
       setTimeout(() => {
-        this.isOnRotate = false
-        this.$emit('on-over')
-      }, this.transitionDuration * 1000 + 100)
+        this.isOnRotate = false;
+        this.$emit("on-over");
+      }, this.transitionDuration * 1000 + 100);
     },
     // 点击go按钮
     _onGo(event) {
-      const _this = this
-      if(_this.isOnRotate) return
-      _this.isOnRotate = true
-      _this.$emit('go-click', event)
+      const _this = this;
+      if (_this.isOnRotate) return;
+      _this.isOnRotate = true;
+      _this.$emit("go-click", event);
     },
     // 渲染转盘
     _drawWheelCanvas() {
@@ -143,7 +166,8 @@ export default {
       //在给定矩形内清空一个矩形
       ctx.clearRect(0, 0, canvasW, canvasH);
       //strokeStyle 绘制颜色
-      ctx.strokeStyle = "#FFBE04"; // 设置描边颜色
+      ctx.strokeStyle = _this.strokeStyle; // 设置描边颜色
+      ctx.lineWidth = 2;
       //font 画布上文本内容的当前字体属性
       // 整个画板会跟着放大缩小 字和图形都跟着被放大缩小  所以不需要rem单位
       // let _fontSize = _this.fontSize
@@ -169,6 +193,7 @@ export default {
 
         // 开始画内容
         ctx.beginPath();
+
         /*
          * 画圆弧，和IOS的Quartz2D类似
          * context.arc(x,y,r,sAngle,eAngle,counterclockwise);
@@ -199,9 +224,12 @@ export default {
         ctx.save();
 
         /*----绘制奖品内容*/
-        
+
         ctx.fillStyle = _this.fontColor;
-        let rewardName = _this._limit(_this.prizeList[i][_this.strKey], _this.strMaxLength);
+        let rewardName = _this._limit(
+          _this.prizeList[i][_this.strKey],
+          _this.strMaxLength
+        );
         let line_height = 17;
 
         // translate方法重新映射画布上的 (0,0) 位置
@@ -214,10 +242,15 @@ export default {
         // rotate方法旋转当前的绘图，因为文字适合当前扇形中心线垂直的！
         // angle，当前扇形自身旋转的角度 +  arc / 2 中心线多旋转的角度  + 垂直的角度90°
         ctx.rotate(angle + arc / 2 + Math.PI / 2);
-        
 
-        if(rewardName.length > _this.strLineLength && _this.strLineLength != 0) {
-          rewardName = rewardName.substring(0, _this.strLineLength) + "||" + rewardName.substring(_this.strLineLength);
+        if (
+          rewardName.length > _this.strLineLength &&
+          _this.strLineLength != 0
+        ) {
+          rewardName =
+            rewardName.substring(0, _this.strLineLength) +
+            "||" +
+            rewardName.substring(_this.strLineLength);
           let rewardNames = rewardName.split("||");
           for (let j = 0; j < rewardNames.length; j++) {
             ctx.fillText(
@@ -241,10 +274,12 @@ export default {
      * maxLength 限制长度 包括...
      * 如：'幸运大转盘',限制3个长度，返回就是'幸运...'
      */
-    _limit(value,maxLength = 0) {
-      if(!value || maxLength == 0) return value
-      return value.length > maxLength ? value.slice(0,maxLength-1) + '...' : value
-    },
+    _limit(value, maxLength = 0) {
+      if (!value || maxLength == 0) return value;
+      return value.length > maxLength
+        ? value.slice(0, maxLength - 1) + "..."
+        : value;
+    }
   }
 };
 </script>
@@ -255,7 +290,7 @@ export default {
   height: 100%;
   ._big-wheel-canvas {
     width: 100%;
-    transition: transform cubic-bezier(0.11,0.77,0.2,0.94); // 转盘旋转
+    transition: transform cubic-bezier(0.11, 0.77, 0.2, 0.94); // 转盘旋转
   }
   ._big-wheel-go-img {
     width: 112px;
